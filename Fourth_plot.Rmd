@@ -1,0 +1,62 @@
+---
+title: "Forth_plot"
+author: "Marcelladane"
+date: "27 July 2017"
+output: html_document
+---
+
+**Instructions**
+
+*Fine particulate matter (PM2.5) is an ambient air pollutant for which there is strong evidence that it is harmful to human health. In the United States, the Environmental Protection Agency (EPA) is tasked with setting national ambient air quality standards for fine PM and for tracking the emissions of this pollutant into the atmosphere. Approximatly every 3 years, the EPA releases its database on emissions of PM2.5. This database is known as the National Emissions Inventory (NEI). You can read more information about the NEI at the EPA National Emissions Inventory web site.*
+
+For each year and for each type of PM source, the NEI records how many tons of PM2.5 were emitted from that source over the course of the entire year. The data that you will use for this assignment are for 1999, 2002, 2005, and 2008.
+
+**PM2.5 Emissions Data structure**
+
+The files contain the follow columns
+*fips*: A five-digit number (represented as a string) indicating the U.S. county
+*SCC*: The name of the source as indicated by a digit string (see source code classification table)
+*Pollutant*: A string indicating the pollutant
+*Emissions*: Amount of PM2.5 emitted, in tons
+*type*: The type of source (point, non-point, on-road, or non-road)
+*year*: The year of emissions recorded
+
+**Question**
+
+4 - Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
+
+First you shall loaded some packages I might need to use
+Second, downloaded the data set (I called exdata) and saved on my working directory and then read 2 different tables for the SSC and NEI;
+SSC = Source Classification Code
+NEI = National Emissions Inventory
+```{r}
+
+packages <- c("data.table", "reshape2", "ggplot2")
+sapply(packages, require, character.only = TRUE, quietly = TRUE)
+
+unzip("exdata.zip")
+
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+```
+
+Since the request was for total coal combustion-related sources emission per year, subset for this type.
+The data for coal is in SSC. Subset SSC first
+Then subset NEI based on the common variable present in NEI and SSC 
+```{r}
+SCC_sub <- SCC[grepl("Coal" , SCC$Short.Name), ]
+NEI_sub <- NEI[NEI$SCC %in% SCC_sub$SCC, ]
+head(NEI_sub)
+```
+
+Finally plot the output.
+No specs of the type of graphic we were suppose to make
+I made a plot with year versus emmissions
+Set geom to bars to make a bar plot
+For each type of emisson I used fill function, this will fill up the bars with different colors depending on the emission type
+Also added labels for the plot
+
+```{r}
+ggplot(NEI_sub, aes(x = factor(year), y = Emissions, fill =type)) + geom_bar(stat= "identity", width = .3) + xlab("Year") +ylab("Coal-Related PM2.5 Emissions") + ggtitle("Coal-Related PM2.5 Emissions in USA (Total)")
+```
+
